@@ -1,0 +1,12 @@
+
+GET http://localhost:3001/api/persons
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Alan Turing",
+  "number": "040-1234567"
+}
+###
+DELETE http://localhost:3001/api/persons/6a678c2916fcc90424eb1395
