@@ -1,68 +1,59 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const morgan = require('morgan')
 const Person = require('./models/person')
 
 const app = express()
 
-app.use(cors())
-app.use(express.json())
+// 1. Static middleware to serve production frontend from the 'dist' folder
 app.use(express.static('dist'))
 
-morgan.token('body', (req) => {
-  return req.method === 'POST' ? JSON.stringify(req.body) : ''
+// 2. Middleware to parse incoming JSON payloads
+app.use(express.json())
+
+// 3. Middleware for Cross-Origin Resource Sharing
+app.use(cors())
+
+// --- ROUTES ---
+
+// GET: Info route
+app.get('/info', (req, res, next) => {
+  Person.find({})
+    .then(persons => {
+      const infoText = `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
+      res.send(infoText)
+    })
+    .catch(error => next(error))
 })
 
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
-
-// Fetch all persons from MongoDB
-app.get('/api/persons', (request, response) => {
-  Person.find({}).then(persons => {
-    response.json(persons)
-  })
+// GET: Fetch all persons
+app.get('/api/persons', (req, res, next) => {
+  Person.find({})
+    .then(persons => {
+      res.json(persons)
+    })
+    .catch(error => next(error))
 })
 
-// Info route
-app.get('/info', (request, response) => {
-  Person.find({}).then(persons => {
-    const count = persons.length
-    const date = new Date()
-    response.send(`
-      <p>Phonebook has info for ${count} people</p>
-      <p>${date}</p>
-    `)
-  })
-})
-
-// Fetch single person
-app.get('/api/persons/:id', (request, response, next) => {
-  Person.findById(request.params.id)
+// GET: Fetch a single person by ID
+app.get('/api/persons/:id', (req, res, next) => {
+  Person.findById(req.params.id)
     .then(person => {
       if (person) {
-        response.json(person)
+        res.json(person)
       } else {
-        response.status(404).end()
+        res.status(404).end()
       }
     })
     .catch(error => next(error))
 })
 
-// Delete single person
-app.delete('/api/persons/:id', (request, response, next) => {
-  Person.findByIdAndDelete(request.params.id)
-    .then(result => {
-      response.status(204).end()
-    })
-    .catch(error => next(error))
-})
-
-// Save new person to MongoDB
-app.post('/api/persons', (request, response, next) => {
-  const body = request.body
+// POST: Add a new person
+app.post('/api/persons', (req, res, next) => {
+  const body = req.body
 
   if (!body.name || !body.number) {
-    return response.status(400).json({ error: 'name or number missing' })
+    return res.status(400).json({ error: 'name or number missing' })
   }
 
   const person = new Person({
@@ -72,10 +63,41 @@ app.post('/api/persons', (request, response, next) => {
 
   person.save()
     .then(savedPerson => {
-      response.json(savedPerson)
+      res.json(savedPerson)
     })
     .catch(error => next(error))
 })
+
+// DELETE: Remove a person by ID
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+// --- ERROR HANDLING MIDDLEWARE ---
+
+// Middleware for unknown endpoints
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+// Centralized error handling middleware
+const errorHandler = (error, req, res, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+app.use(errorHandler)
+
+// --- LISTEN ---
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
