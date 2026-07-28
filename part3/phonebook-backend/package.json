@@ -5,19 +5,24 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@eslint/js": "^10.0.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "eslint": "^10.8.0",
     "express": "^5.2.1",
     "mongoose": "^9.8.0",
     "morgan": "^1.11.0"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin-js": "^4.4.1",
+    "globals": "^17.8.0",
     "nodemon": "^3.1.14"
   }
 }

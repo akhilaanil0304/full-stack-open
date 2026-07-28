@@ -17,7 +17,7 @@ app.use(cors())
 // --- ROUTES ---
 
 // GET: Info route
-app.get('/info', (req, res, next) => {
+app.get('/info', (_req, res, next) => {
   Person.find({})
     .then(persons => {
       const infoText = `<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`
@@ -27,7 +27,7 @@ app.get('/info', (req, res, next) => {
 })
 
 // GET: Fetch all persons
-app.get('/api/persons', (req, res, next) => {
+app.get('/api/persons', (_req, res, next) => {
   Person.find({})
     .then(persons => {
       res.json(persons)
@@ -80,13 +80,13 @@ app.delete('/api/persons/:id', (req, res, next) => {
 // --- ERROR HANDLING MIDDLEWARE ---
 
 // Middleware for unknown endpoints
-const unknownEndpoint = (req, res) => {
+const unknownEndpoint = (_req, res) => {
   res.status(404).send({ error: 'unknown endpoint' })
 }
 app.use(unknownEndpoint)
 
 // Centralized error handling middleware
-const errorHandler = (error, req, res, next) => {
+const errorHandler = (error, _req, res, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
