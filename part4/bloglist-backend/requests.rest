@@ -1,0 +1,42 @@
+### Get all blogs
+GET http://localhost:3001/api/blogs
+
+###
+
+### Step 1: Create a new user in the database
+POST http://localhost:3001/api/users
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "name": "Test User 2",
+  "password": "secretpassword"
+}
+
+###
+
+### Step 2: Login Request (Generates JWT Token)
+POST http://localhost:3001/api/login
+Content-Type: application/json
+
+{
+  "username": "testuser2",
+  "password": "secretpassword"
+}
+
+###
+
+### Step 3: Create a Blog Post using the JWT Token
+# 1. Click 'Send Request' on Step 2 above
+# 2. Copy the token value from the response panel on the right
+# 3. Replace YOUR_TOKEN_HERE below with that copied token string (keep 'Bearer ' before it)
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+Authorization: Bearer "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyMiIsImlkIjoiNmE2YjhiMjYzZDVjNjk4Njc4OTM5NjI3IiwiaWF0IjoxNzg1NDMzMzQ2LCJleHAiOjE3ODU0MzY5NDZ9.BGE0Yz9mbMOD39_zTXTP_Q6fVDIneOlB2sUiAPsomPs"
+
+{
+  "title": "Learning Node.js and Express",
+  "author": "Test User 2",
+  "url": "https://fullstackopen.com/",
+  "likes": 10
+}
